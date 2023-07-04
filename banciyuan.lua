@@ -483,9 +483,9 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         check("https://bcy.net/u/" .. item_value .. "/" .. s)
       end
       check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&follow_type=0")
-      check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&page=1&follow_type=0")
+      check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&follow_type=0&page=1")
       check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&follow_type=1")
-      check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&page=1&follow_type=1")
+      check("https://bcy.net/apiv3/user/follow-list?uid=" .. item_value .. "&follow_type=1&page=1")
       check("https://bcy.net/apiv3/collection/getMyCollectionList?uid=" .. item_value .. "&since=" .. tostring(os.time(os.date("!*t"))))
       for _, s in pairs({
         "all",
@@ -553,7 +553,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     if string.match(url, "^https?://bcy%.net/item/detail/") then
       -- not getting video yet
       for _, sort in pairs({"hot", "time"}) do
-        check("https://bcy.net/apiv3/cmt/reply/list?page=1&item_id=" .. item_value .. "&limit=15&sort=" .. sort)
+        check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort .. "&page=1")
         check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort)
       end
     end
