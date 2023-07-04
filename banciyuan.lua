@@ -494,7 +494,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         "ganswer",
         "video"
       }) do
-        check("https://bcy.net/u/" .. item_value .. "?filter=" .. s)
+        --check("https://bcy.net/u/" .. item_value .. "?filter=" .. s)
         if s ~= "all" then
           check("https://bcy.net/u/" .. item_value .. "/post/" .. s)
           check("https://bcy.net/u/" .. item_value .. "/post/" .. s .. "?p=1")
