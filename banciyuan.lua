@@ -229,7 +229,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   end
 
   local function fix_case(newurl)
-    if not string.match(newurl, "^https?://.") then
+    if not string.match(newurl, "^https?://[^/]") then
       return newurl
     end
     if string.match(newurl, "^https?://[^/]+$") then
@@ -241,7 +241,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
 
   local function check(newurl)
     newurl = decode_codepoint(newurl)
-    newurl = fix_case(newurl)
+    --newurl = fix_case(newurl)
     local origurl = url
     if string.len(url) == 0 then
       return nil
