@@ -83,7 +83,8 @@ discover_item = function(target, item)
 end
 
 find_item = function(url)
-  local value = string.match(url, "^https?://bcy%.net/item/detail/([0-9]+)$")
+  --local value = string.match(url, "^https?://bcy%.net/item/detail/([0-9]+)$")
+  local value = string.match(url, "^https?://bcy%.net/apiv3/cmt/reply/list%?page=1&item_id=([0-9]+)&limit=15&sort=hot$")
   local type_ = "item"
   if not value then
     value = string.match(url, "^https?://bcy%.net/u/([0-9]+)$")
@@ -463,6 +464,10 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       check_new_params(url, "p", "1")
     end
 
+    if item_type == "item" then
+      check("https://bcy.net/item/detail/" .. item_value)
+    end
+
     -- user
     if string.match(url, "^https?://bcy%.net/u/[0-9]+$") then
       local base_url = "https://bcy.net/apiv3/user/selfPosts?uid=" .. item_value
@@ -612,6 +617,18 @@ wget.callbacks.write_to_warc = function(url, http_stat)
   if not item_name then
     error("No item name found.")
   end
+  if string.match(url["url"], "^https?://bcy%.net/apiv3/cmt/reply/list%?page=1&item_id=[0-9]+&limit=15&sort=hot$") then
+    if not html then
+      html = read_file(http_stat["local_file"])
+    end
+    local json = JSON:decode(html)
+    if json["code"] == 500013
+      and json["msg"] == "获取item信息失败" then
+      print("Item likely does not exist.")
+      abort_item()
+      return false
+    end
+  end
   if http_stat["statcode"] ~= 200 then
     retry_url = true
     return false
@@ -619,6 +636,12 @@ wget.callbacks.write_to_warc = function(url, http_stat)
   if string.match(url["url"], "^https?://bcy%.net/item/detail/") then
     if not html then
       html = read_file(http_stat["local_file"])
+    end
+    if string.match(html, '<img%s+src="https://p3%-bcy%.bcyimg%.com/obj/ttfe/bcy/web/not%-found%-img%.png"%s+class="not%-found%-img"/>')
+      and string.match(html, 'window%.__ssr_data%s*=%s*JSON.parse%("{}"%);') then
+      print("Item likely does not exist.")
+      abort_item()
+      return false
     end
     json = get_ssr_data(html)
     if not json then
