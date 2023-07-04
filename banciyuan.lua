@@ -137,7 +137,8 @@ allowed = function(url, parenturl)
   end
 
   if not string.match(url, "^https?://.")
-    or string.match(url, "/apiv3/user/favor") then
+    or string.match(url, "/apiv3/user/favor")
+    or string.match(url, "/u/[0-9]+%?filter=") then
     return false
   end
 
@@ -454,9 +455,9 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       html = html .. flatten_json(json)
     end
 
-    if string.match(url, "[%?&]since=") then
+    --[[if string.match(url, "[%?&]since=") then
       check_new_params(url, "since", "0")
-    end
+    end]]
 
     if string.match(url, "[%?&]p=") then
       check_new_params(url, "p", "1")
@@ -465,7 +466,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     -- user
     if string.match(url, "^https?://bcy%.net/u/[0-9]+$") then
       local base_url = "https://bcy.net/apiv3/user/selfPosts?uid=" .. item_value
-      check(base_url)
+      --check(base_url)
       check(base_url .. "&since=0")
       if ssr["page"]["since"] then
         check(base_url .. "&since=" .. ssr["page"]["since"])
@@ -478,7 +479,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         "following",
         -- other style
         "post/",
-        "post/?p=1"
+        --"post/?p=1"
       }) do
         check("https://bcy.net/u/" .. item_value .. "/" .. s)
       end
@@ -497,7 +498,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         --check("https://bcy.net/u/" .. item_value .. "?filter=" .. s)
         if s ~= "all" then
           check("https://bcy.net/u/" .. item_value .. "/post/" .. s)
-          check("https://bcy.net/u/" .. item_value .. "/post/" .. s .. "?p=1")
+          --check("https://bcy.net/u/" .. item_value .. "/post/" .. s .. "?p=1")
         end
         -- skipping the POST requests unfortunately
         --[[post_request(
@@ -552,13 +553,23 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     -- item
     if string.match(url, "^https?://bcy%.net/item/detail/") then
       -- not getting video yet
-      for _, sort in pairs({"hot", "time"}) do
+      for _, sort in pairs({"hot"--[[, "time"]]}) do
         check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort .. "&page=1")
-        check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort)
+        --check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort)
       end
     end
     if string.match(url, "^https?://bcy%.net/apiv3/cmt/reply/list") then
       if count(json["data"]["data"]) > 0 then
+        queue_next(url, "page", 1)
+      end
+      for _, data in pairs(json["data"]["data"]) do
+        if count(data["comments"]) < data["comments_count"] then
+          check("https://bcy.net/apiv3/cmt/comment/list?page=1&item_id=" .. item_value .. "&reply_id=" .. data["id"])
+        end
+      end
+    end
+    if string.match(url, "^https?://bcy%.net/apiv3/cmt/comment/list") then
+      if count(json["data"]["data"]) == 15 then
         queue_next(url, "page", 1)
       end
     end
@@ -599,6 +610,10 @@ wget.callbacks.write_to_warc = function(url, http_stat)
   if not item_name then
     error("No item name found.")
   end
+  if http_stat["statcode"] ~= 200 then
+    retry_url = true
+    return false
+  end
   if string.match(url["url"], "^https?://bcy%.net/item/detail/") then
     if not html then
       html = read_file(http_stat["local_file"])
@@ -637,10 +652,6 @@ wget.callbacks.write_to_warc = function(url, http_stat)
       retry_url = true
       return false
     end
-  end
-  if http_stat["statcode"] ~= 200 then
-    retry_url = true
-    return false
   end
   if abortgrab then
     print("Not writing to WARC.")
