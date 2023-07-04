@@ -553,9 +553,11 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     -- item
     if string.match(url, "^https?://bcy%.net/item/detail/") then
       -- not getting video yet
-      for _, sort in pairs({"hot"--[[, "time"]]}) do
-        check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort .. "&page=1")
-        --check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort)
+      if ssr["detail"]["post_data"]["reply_count"] > 0 then 
+        for _, sort in pairs({"hot"--[[, "time"]]}) do
+          check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort .. "&page=1")
+          --check("https://bcy.net/apiv3/cmt/reply/list?item_id=" .. item_value .. "&limit=15&sort=" .. sort)
+        end
       end
     end
     if string.match(url, "^https?://bcy%.net/apiv3/cmt/reply/list") then
