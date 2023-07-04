@@ -617,7 +617,7 @@ wget.callbacks.write_to_warc = function(url, http_stat)
   if not item_name then
     error("No item name found.")
   end
-  if string.match(url["url"], "^https?://bcy%.net/apiv3/cmt/reply/list%?page=1&item_id=[0-9]+&limit=15&sort=hot$") then
+  if string.match(url["url"], "^https?://bcy%.net/apiv3/cmt/reply/list%?item_id=[0-9]+&limit=15&sort=hot&page=1$") then
     if not html then
       html = read_file(http_stat["local_file"])
     end
