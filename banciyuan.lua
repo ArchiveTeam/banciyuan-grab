@@ -84,7 +84,7 @@ end
 
 find_item = function(url)
   --local value = string.match(url, "^https?://bcy%.net/item/detail/([0-9]+)$")
-  local value = string.match(url, "^https?://bcy%.net/apiv3/cmt/reply/list%?page=1&item_id=([0-9]+)&limit=15&sort=hot$")
+  local value = string.match(url, "^https?://bcy%.net/apiv3/cmt/reply/list%?item_id=([0-9]+)&limit=15&sort=hot&page=1$")
   local type_ = "item"
   if not value then
     value = string.match(url, "^https?://bcy%.net/u/([0-9]+)$")

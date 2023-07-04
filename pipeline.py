@@ -59,7 +59,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20230704.12'
+VERSION = '20230704.13'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
 TRACKER_ID = 'banciyuan'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -283,7 +283,7 @@ class WgetArgs(object):
             item_type, item_value = item_name.split(':', 1)
             if item_type == 'item':
                 wget_args.extend(['--warc-header', 'banciyuan-item: '+item_value])
-                wget_args.append('https://bcy.net/apiv3/cmt/reply/list?page=1&item_id={}&limit=15&sort=hot'.format(item_value))
+                wget_args.append('https://bcy.net/apiv3/cmt/reply/list?item_id={}&limit=15&sort=hot&page=1'.format(item_value))
             elif item_type == 'user':
                 wget_args.extend(['--warc-header', 'banciyuan-user: '+item_value])
                 wget_args.append('https://bcy.net/u/'+item_value)
