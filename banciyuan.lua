@@ -472,7 +472,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         check(base_url .. "&since=" .. ssr["page"]["since"])
       end
       for _, s in pairs({
-        "like",
+        --"like",
         "collection",
         "circle",
         "follower",
@@ -621,6 +621,11 @@ wget.callbacks.write_to_warc = function(url, http_stat)
       html = read_file(http_stat["local_file"])
     end
     json = get_ssr_data(html)
+    if not json then
+      print("Bad SSR data.")
+      retry_url = true
+      return false
+    end
     if json["detail"]["post_data"]["type"] == "video" then
       print("Skipping videos for now.")
       abort_item()
