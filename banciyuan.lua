@@ -745,8 +745,9 @@ wget.callbacks.finish = function(start_time, end_time, wall_time, numurls, total
   end
   file:close()
   for key, data in pairs({
-    ["banciyuan-"] = discovered_items,
-    ["urls-"] = discovered_outlinks
+    ["banciyuan-nk4dhjt8pcqhn56z"]=discovered_items,
+    ["urls-rt62d2tgo2ctf2ui"]=discovered_outlinks,
+    ["banciyuan-images-mz48dpc97ktci5t0"]=discovered_images
   }) do
     print('queuing for', string.match(key, "^(.+)%-"))
     local items = nil
