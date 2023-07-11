@@ -4,6 +4,7 @@ from distutils.version import StrictVersion
 import hashlib
 import os.path
 import random
+import re
 from seesaw.config import realize, NumberConfigValue
 from seesaw.externalprocess import ExternalProcess
 from seesaw.item import ItemInterpolation, ItemValue
@@ -59,11 +60,11 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20230704.15'
+VERSION = '20230711.01'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
-TRACKER_ID = 'banciyuan'
+TRACKER_ID = 'banciyuan-images'
 TRACKER_HOST = 'legacy-api.arpa.li'
-MULTI_ITEM_SIZE = 10
+MULTI_ITEM_SIZE = 50
 
 
 ###########################################################################
@@ -155,6 +156,8 @@ class SetBadUrls(SimpleTask):
         with open('%(item_dir)s/%(warc_file_base)s_bad-items.txt' % item, 'r') as f:
             for aborted_item in f:
                 aborted_item = aborted_item.strip().lower()
+                if aborted_item.startswith('bcyimg:'):
+                    aborted_item = aborted_item.split(':', 1)[1]
                 index = items_lower.index(aborted_item)
                 item.log_output('Item {} is aborted.'.format(aborted_item))
                 items.pop(index)
@@ -198,7 +201,7 @@ class ZstdDict(object):
         response = requests.get(
             'https://legacy-api.arpa.li/dictionary',
             params={
-                'project': TRACKER_ID
+                'project': 'banciyuan'
             }
         )
         response.raise_for_status()
@@ -272,13 +275,15 @@ class WgetArgs(object):
         with open(os.path.join(item['item_dir'], 'zstdict'), 'wb') as f:
             f.write(dict_data['dict'])
         item['dict_id'] = dict_data['id']
-        item['dict_project'] = TRACKER_ID
+        item['dict_project'] = 'banciyuan'
         wget_args.extend([
             '--warc-zstd-dict', ItemInterpolation('%(item_dir)s/zstdict'),
         ])
 
         for item_name in item['item_name'].split('\0'):
             wget_args.extend(['--warc-header', 'x-wget-at-project-item-name: '+item_name])
+            if re.search(r'^https?://[^/]+bcyimg\.com/', item_name):
+                item_name = 'bcyimg:' + item_name
             wget_args.append('item-name://'+item_name)
             item_type, item_value = item_name.split(':', 1)
             if item_type == 'item':
@@ -287,6 +292,9 @@ class WgetArgs(object):
             elif item_type == 'user':
                 wget_args.extend(['--warc-header', 'banciyuan-user: '+item_value])
                 wget_args.append('https://bcy.net/u/'+item_value)
+            elif item_type == 'bcyimg':
+                wget_args.extend(['--warc-header', 'bcyimg-url: '+item_value])
+                wget_args.append(item_value)
             #elif item_type == 'collection':
             #    wget_args.extend(['--warc-header', 'banciyuan-collection: '+item_value])
             #    wget_args.append('https://bcy.net/collection/'+item_value)

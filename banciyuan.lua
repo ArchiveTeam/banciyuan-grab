@@ -90,6 +90,10 @@ find_item = function(url)
     value = string.match(url, "^https?://bcy%.net/u/([0-9]+)$")
     type_ = "user"
   end
+  if not value then
+    value = string.match(url, "^(https?://[^/]+bcyimg%.com/.+)$")
+    type_ = "bcyimg"
+  end
   --[[if not value then
     value = string.match(url, "^https?://bcy%.net/collection/([0-9]+)$")
     type_ = "collection"
@@ -147,7 +151,8 @@ allowed = function(url, parenturl)
     url = url .. "/"
   end
 
-  if string.match(url, "^https?://[^/]+bcyimg%.com/") then
+  if string.match(url, "^https?://[^/]+bcyimg%.com/")
+    and item_type ~= "bcyimg" then
     discover_item(discovered_images, url)
     return false
   end
